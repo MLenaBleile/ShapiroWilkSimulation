@@ -1,0 +1,71 @@
+
+test = function(tt,n,alpha){
+x <<- c()
+for (i in 1:tt){
+sampls = runif(n)
+x[i] <<- t.test(sampls, mu = 0.5)$p.value
+}
+alphahat  = length(x[x <= alpha])/tt
+return(alphahat)
+}
+
+getAlpha <- function(n, simSize, alph){
+  vec <- numeric()
+  j = 1
+  while (j <= simSize){
+    sampln <- runif(n)
+    pval <- shapiro.test(sampln)$p.value 
+    if (pval >= alph){
+      vec[j] <- t.test(sampln, mu = 0.5)$p.value
+      j = j + 1
+    }
+    else{
+      next
+    }
+  }
+  res<- length(vec[vec < 0.05])/length(vec)
+  return(res) 
+}
+
+
+
+ns = c(10,20,30,50)
+y = c()
+filtered = c()
+for (j in 1:4){
+y[j] = test(100000,ns[j],0.05)}
+
+
+
+for (j in 1:4){
+  y[j] = test(100000,ns[j],0.05)
+  filtered[j] = getAlpha(ns[j],100000,0.05)
+}
+
+y - 0.05
+filtered - 0.05
+
+y2 = c()
+filtered2 = c()
+
+for (j in 1:4){
+  y2[j] = test(100000,ns[j],0.001)
+  filtered2[j] = getAlpha(ns[j],100000,0.001)
+}
+
+y2 - 0.05
+filtered2 - 0.05
+
+
+####CODE FOR GRAPH#####
+
+x11()
+xx<-c(10,20,30,50) 
+yy<- rep(0.5,4)
+plot(seq(0,50,5), seq(0,0.1,0.01), type = 'n', xlab = 'Size', ylab = 'Alpha', main = "Plot of simulated Alpha levels for pretest Alpha = 0.001 and 0.05")
+points(seq(0,50,5), rep(0.05,11), type = 'l')
+points(xx, rep(0.05,4), col = 'black', pch = 16)
+points(xx, filtered, col = 3, pch = 18)
+points(xx, filtered2, col = 2, pch = 17)
+legend('topleft', legend = c('Nominal alpha', 'Alpha = 0.05', 'Alpha = 0.001') , pch = c(16,17,18), col = c('black', 2,3))
+
